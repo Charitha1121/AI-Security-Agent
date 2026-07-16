@@ -1,0 +1,75 @@
+15/07/2026
+SINGLE ROW FUNCTIONS
+upper():
+select first_name from employees;
+select UPPER(first_name) AS upper_name
+from employees;
+LOWER():
+select LOWER(first_name) AS lower_name from employees;
+select email , lower(email) AS lower_email;
+1.lowercase all job_ids:
+select job_id ,LOWER(job_id) AS job_lower from employees;
+
+select first_name,SUBSTR(first_name,1,3) AS short_name from employees;
+select email,SUBSTR(email,-4) AS last_chars from employees;
+job_id length:
+select job_id , LENGTH(job_id) AS id_length from employees;
+
+INSTR(string,substring)
+1)Find position of 'a' in first_name
+select first_name, INSTR(first_name ,'a') AS position from employees;
+
+CONCAT()- Combine 2 strings
+1)combine first ans last name
+select CONCAT(first_name,last_name) AS full_name from employees;
+
+2)combine job_id and department_id as a tag
+select concat(job_id,department_id) as job_tag from employees;
+
+TRIM()- Removes unnecessary spaces and characters
+1) trim spaces
+select first_name,TRIM(first_name) AS trimmed_name from employeesl
+2)remove leading 'a' from 'aarun':
+select TRIM(LEADING 'A' from 'Aarun') As result from dual;
+3) Trailing:
+select trim(trailing 'x' from 'maheshx') AS result from dual;
+
+summary table
+ function
+upper - converts text to uppercase - UPPER('mahesh')->MAHESH
+lower- converts text to lowercase-LOWER('KING')->king
+SUBSTR-extracts text to lowercase-
+
+1)ROUND
+select employee_id,salary, ROUND(salary,1) AS rounded_salary from employees;
+2)FLOOR(number)-returns the largest integr less than or equal to the number.
+select employee_id,salary,FLOOR(salary) AS  floor_salary from employees;
+3)MODULOS-remainer value
+select employee_id,MOD(emloyee_id,5) ASmod_result from employees;
+modulus with condition
+select* from employees where MOD9employee_id,2)=0; --even employee IDs
+4)ABSOLUTE
+select employee_id,ABS(
+5)POWER
+select employee_id,POWER(salary,2) AS salary_squared from empployees;
+
+
+select sysdate from dual;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
