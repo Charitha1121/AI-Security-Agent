@@ -4,18 +4,26 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Upload from "./pages/Upload";
 import ScanResult from "./pages/ScanResult";
+import ScanHistory from "./pages/ScanHistory";
 
 function App() {
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Login />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/upload" element={<Upload />} />
-                <Route path="/scan" element={<ScanResult />} />
-            </Routes>
-        </BrowserRouter>
-    );
+  return (
+    <BrowserRouter>
+      <Routes>
+
+        <Route path="/" element={<Login />} />
+
+        <Route path="/dashboard" element={<Dashboard />} />
+
+        <Route path="/upload" element={<Upload />} />
+
+        <Route path="/scan" element={<ScanResult />} />
+
+        <Route path="/scan-history" element={<ScanHistory />} />
+
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;

@@ -1,68 +1,157 @@
-from __future__ import annotations
-
-from collections.abc import Generator
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user
-from app.database.session import get_session
+from app.api.dependencies import (
+    get_current_user,
+    get_db,
+)
 from app.models.user import User
+from app.models.file import File
+from app.models.scan_result import ScanResult
 from app.schemas.scan import ScanResponse
 from app.services.scan_service import ScanService
 
-router = APIRouter(
-    prefix="/scan",
-    tags=["AI Scan"],
+
+router = APIRouter()
+
+scan_service = ScanService()
+
+
+# ============================================================
+# GET SCAN HISTORY
+# ============================================================
+
+@router.get(
+    "/history",
+    response_model=list[ScanResponse],
 )
+def get_scan_history(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+
+    scans = (
+        db.query(ScanResult)
+        .join(File, ScanResult.file_id == File.id)
+        .filter(File.user_id == current_user.id)
+        .order_by(ScanResult.created_at.desc())
+        .all()
+    )
+
+    # Normalize old malformed detected_phones data
+    for scan in scans:
+
+        normalized_phones = []
+
+        for item in scan.detected_phones or []:
+
+            if isinstance(item, list):
+
+                normalized_phones.extend(
+                    str(phone)
+                    for phone in item
+                    if phone
+                )
+
+            else:
+
+                normalized_phones.append(
+                    str(item)
+                )
+
+        scan.detected_phones = normalized_phones
+
+    return scans
 
 
-def get_db() -> Generator[Session, None, None]:
-    yield from get_session()
+# ============================================================
+# SCAN FILE
+# ============================================================
 
-
-def get_scan_service() -> ScanService:
-    return ScanService()
-
-
-@router.post("/{file_id}", response_model=ScanResponse)
+@router.post(
+    "/{file_id}",
+    response_model=ScanResponse,
+)
 def scan_file(
     file_id: UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    service: ScanService = Depends(get_scan_service),
 ):
+
     try:
-        result = service.scan_file(db, file_id)
-        return ScanResponse.model_validate(result)
+
+        result = scan_service.scan_file(
+            db,
+            file_id,
+        )
+
+        return result["scan"]
+
     except ValueError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        )
 
 
-@router.get("/{file_id}", response_model=ScanResponse)
+# ============================================================
+# GET SCAN RESULT
+# ============================================================
+
+@router.get(
+    "/{file_id}",
+    response_model=ScanResponse,
+)
 def get_scan(
     file_id: UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    service: ScanService = Depends(get_scan_service),
 ):
-    try:
-        result = service.get_scan_result(db, file_id)
-        return ScanResponse.model_validate(result)
-    except ValueError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+
+    scan = scan_service.get_scan_result(
+        db,
+        file_id,
+    )
+
+    if scan is None:
+
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Scan result not found",
+        )
+
+    return scan
 
 
-@router.put("/{file_id}/rescan", response_model=ScanResponse)
-def rescan(
+# ============================================================
+# RESCAN FILE
+# ============================================================
+
+@router.put(
+    "/{file_id}/rescan",
+    response_model=ScanResponse,
+)
+def rescan_file(
     file_id: UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    service: ScanService = Depends(get_scan_service),
 ):
+
     try:
-        result = service.rescan_file(db, file_id)
-        return ScanResponse.model_validate(result)
+
+        result = scan_service.rescan_file(
+            db,
+            file_id,
+        )
+
+        return result["scan"]
+
     except ValueError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        )

@@ -1,0 +1,14 @@
+Name : John
+
+Email : john@gmail.com
+
+Password: admin123
+
+OpenAI Key:
+sk-123456789012345678901234567890
+
+GitHub:
+ghp_abcdefghijklmnopqrstuvwxyz1234567890
+
+JWT:
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiJ9.signature

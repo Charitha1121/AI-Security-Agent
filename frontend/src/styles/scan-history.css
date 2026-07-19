@@ -1,0 +1,90 @@
+.history-page {
+  flex: 1;
+  padding: 32px;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+.history-header {
+  margin-bottom: 28px;
+}
+
+.history-header h1 {
+  margin: 0;
+  font-size: 28px;
+  color: #111827;
+}
+
+.history-header p {
+  margin-top: 8px;
+  color: #6b7280;
+}
+
+.history-table-container {
+  background: white;
+  border-radius: 12px;
+  overflow-x: auto;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-table th,
+.history-table td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.history-table th {
+  background: #f9fafb;
+  color: #374151;
+  font-size: 14px;
+}
+
+.history-table td {
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.risk-score,
+.verdict {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.safe-risk {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.warning-risk {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.high-risk {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.history-message {
+  padding: 40px;
+  text-align: center;
+  background: white;
+  border-radius: 12px;
+  color: #6b7280;
+}
+
+.history-error {
+  padding: 20px;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 8px;
+}

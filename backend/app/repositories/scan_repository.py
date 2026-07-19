@@ -1,53 +1,69 @@
 from __future__ import annotations
 
+from typing import Optional
 from uuid import UUID
 
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.scan_result import ScanResult
 
 
 class ScanRepository:
-    """Repository for scan results."""
+    """Database operations for scan results."""
 
     def create_scan(
         self,
         db: Session,
-        scan_result: ScanResult,
+        scan: ScanResult,
     ) -> ScanResult:
-        """Save a new scan result."""
-
-        db.add(scan_result)
+        db.add(scan)
         db.commit()
-        db.refresh(scan_result)
+        db.refresh(scan)
 
-        return scan_result
+        return scan
 
     def get_by_file_id(
         self,
         db: Session,
         file_id: UUID,
-    ) -> ScanResult | None:
-        """Return the latest scan result for a file."""
-
-        stmt = (
-            select(ScanResult)
-            .where(ScanResult.file_id == file_id)
-            .order_by(ScanResult.created_at.desc())
+    ) -> Optional[ScanResult]:
+        return (
+            db.query(ScanResult)
+            .filter(
+                ScanResult.file_id == file_id
+            )
+            .order_by(
+                ScanResult.created_at.desc()
+            )
+            .first()
         )
 
-        return db.scalar(stmt)
+    def get_all(
+        self,
+        db: Session,
+    ) -> list[ScanResult]:
+        return (
+            db.query(ScanResult)
+            .order_by(
+                ScanResult.created_at.desc()
+            )
+            .all()
+        )
 
     def delete_scan(
         self,
         db: Session,
         file_id: UUID,
     ) -> None:
-        """Delete the existing scan result for a file."""
+        scans = (
+            db.query(ScanResult)
+            .filter(
+                ScanResult.file_id == file_id
+            )
+            .all()
+        )
 
-        scan = self.get_by_file_id(db, file_id)
-
-        if scan:
+        for scan in scans:
             db.delete(scan)
-            db.commit()
+
+        db.commit()

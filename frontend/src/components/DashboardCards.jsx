@@ -2,14 +2,13 @@ import "../styles/dashboard.css";
 import { ShieldCheck, FileText, Clock, Brain } from "lucide-react";
 
 export default function DashboardCards({ files }) {
-  const total = files.length;
-  const scanned = files.filter(
-    (f) => f.scan_status === "completed"
-  ).length;
+ const total = files.length;
 
-  const pending = files.filter(
-    (f) => f.scan_status === "pending"
-  ).length;
+const scanned = files.filter(
+  (f) => f.scan_status === "completed"
+).length;
+
+const pending = total - scanned;
 
   return (
     <div className="cards">

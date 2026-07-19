@@ -14,4 +14,64 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+export const authApi = {
+
+  login: (email, password) =>
+    api.post("/auth/login", {
+      username: email,
+      password,
+    }),
+
+  me: () =>
+    api.get("/auth/me"),
+};
+
+
+export const fileApi = {
+
+  upload: (file) => {
+
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    return api.post(
+      "/files/upload",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+  },
+
+  getAll: () =>
+    api.get("/files/"),
+};
+
+
+export const scanApi = {
+
+  scan: (fileId) =>
+    api.post(`/scan/${fileId}`),
+
+  get: (fileId) =>
+    api.get(`/scan/${fileId}`),
+
+  rescan: (fileId) =>
+    api.put(`/scan/${fileId}/rescan`),
+};
+
+
+export const dashboardApi = {
+
+  stats: () =>
+    api.get("/dashboard/stats"),
+};
+export const getScanHistory = async () => {
+  const response = await api.get("/api/v1/scan/history");
+  return response.data;
+};
+
 export default api;
