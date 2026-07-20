@@ -7,9 +7,11 @@ from app.api.dependencies import (
     get_current_user,
     get_db,
 )
+
 from app.models.user import User
 from app.models.file import File
 from app.models.scan_result import ScanResult
+
 from app.schemas.scan import ScanResponse
 from app.services.scan_service import ScanService
 
@@ -34,9 +36,16 @@ def get_scan_history(
 
     scans = (
         db.query(ScanResult)
-        .join(File, ScanResult.file_id == File.id)
-        .filter(File.user_id == current_user.id)
-        .order_by(ScanResult.created_at.desc())
+        .join(
+            File,
+            ScanResult.file_id == File.id,
+        )
+        .filter(
+            File.user_id == current_user.id
+        )
+        .order_by(
+            ScanResult.created_at.desc()
+        )
         .all()
     )
 

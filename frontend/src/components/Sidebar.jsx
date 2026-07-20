@@ -9,7 +9,6 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 
 import "../styles/sidebar.css";
-
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();

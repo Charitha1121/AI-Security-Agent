@@ -70,8 +70,10 @@ export const dashboardApi = {
     api.get("/dashboard/stats"),
 };
 export const getScanHistory = async () => {
-  const response = await api.get("/api/v1/scan/history");
+  const response = await api.get(
+    "/scan/history"
+  );
+
   return response.data;
 };
-
 export default api;

@@ -19,8 +19,7 @@ from app.database.session import get_session
 from app.models.user import User
 from app.schemas.file import FileResponse
 from app.services.file_service import FileService
-
-router = APIRouter(prefix="/files", tags=["Files"])
+router = APIRouter()
 
 UPLOAD_DIRECTORY = Path("uploads")
 

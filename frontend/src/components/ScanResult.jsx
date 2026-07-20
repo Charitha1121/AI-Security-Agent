@@ -1,116 +1,329 @@
-import "../styles/dashboard.css";
-import "react-circular-progressbar/dist/styles.css";
-import {
-  CircularProgressbar,
-  buildStyles,
-} from "react-circular-progressbar";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
-export default function ScanResult({ scan }) {
+import api from "../api/api";
+import Sidebar from "./Sidebar";
 
-  const riskColor =
-    scan.risk_score > 70
-      ? "#ef4444"
-      : scan.risk_score > 40
-      ? "#f59e0b"
-      : "#22c55e";
+import "../styles/scan-result.css";
 
-  return (
+export default function ScanResult({ scan: dashboardScan }) {
+  const { fileId } = useParams();
 
-    <div className="section">
+  const [scan, setScan] = useState(
+    dashboardScan || null
+  );
 
-      <h2>🛡 AI Scan Report</h2>
+  const [loading, setLoading] = useState(
+    !dashboardScan
+  );
 
-      <div className="scan-layout">
+  const [error, setError] = useState("");
 
-        <div className="gauge-card">
+  useEffect(() => {
+    if (!dashboardScan && fileId) {
+      loadScanResult();
+    }
+  }, [fileId, dashboardScan]);
 
-          <CircularProgressbar
-            value={scan.risk_score}
-            text={`${scan.risk_score}%`}
-            styles={buildStyles({
-              pathColor: riskColor,
-              textColor: riskColor,
-              trailColor: "#eee",
-            })}
-          />
+  const loadScanResult = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-          <h3>Risk Score</h3>
+      console.log(
+        "Request URL:",
+        `/scan/${fileId}`
+      );
 
-          <span
-            className={`badge ${
-              scan.verdict === "Safe"
-                ? "safe"
-                : scan.verdict === "Warning"
-                ? "warning"
-                : "danger"
-            }`}
-          >
-            {scan.verdict}
-          </span>
+      const response = await api.get(
+        `/scan/${fileId}`
+      );
 
-        </div>
+      console.log(
+        "Loaded Scan Result:",
+        response.data
+      );
 
-        <div className="details-card">
+      setScan(response.data);
 
-          <h3>🤖 AI Summary</h3>
+    } catch (err) {
+      console.error(
+        "Load Scan Result Error:",
+        err
+      );
 
-          <p>{scan.ai_summary}</p>
+      console.error(
+        "Status:",
+        err.response?.status
+      );
 
-          <hr />
+      console.error(
+        "Response:",
+        err.response?.data
+      );
 
-          <h3>🔑 Keywords</h3>
+      setError(
+        err.response?.data?.detail ||
+        "Failed to load scan result"
+      );
 
-          <ul>
-            {(scan.detected_keywords || []).map((k, i) => (
-              <li key={i}>{k}</li>
-            ))}
-          </ul>
+    } finally {
+      setLoading(false);
+    }
+  };
 
-          <h3>🌐 URLs</h3>
+  if (loading) {
+    return (
+      <div className="app-layout">
 
-          <ul>
-            {(scan.detected_urls || []).map((u, i) => (
-              <li key={i}>{u}</li>
-            ))}
-          </ul>
+        <Sidebar />
 
-          <h3>📧 Emails</h3>
+        <main className="scan-result-page">
 
-          <ul>
-            {(scan.detected_emails || []).map((e, i) => (
-              <li key={i}>{e}</li>
-            ))}
-          </ul>
+          <h1>
+            Loading Scan Report...
+          </h1>
 
-          <h3>📱 Phone Numbers</h3>
-
-          <ul>
-            {(scan.detected_phones || []).map((p, i) => (
-              <li key={i}>{JSON.stringify(p)}</li>
-            ))}
-          </ul>
-
-          <h3>💻 IP Addresses</h3>
-
-          <ul>
-            {(scan.detected_ips || []).map((ip, i) => (
-              <li key={i}>{ip}</li>
-            ))}
-          </ul>
-
-          <h3>🚨 Malicious URLs</h3>
-
-          <ul>
-            {(scan.malicious_urls || []).map((url, i) => (
-              <li key={i}>{url}</li>
-            ))}
-          </ul>
-
-        </div>
+        </main>
 
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="app-layout">
+
+        <Sidebar />
+
+        <main className="scan-result-page">
+
+          <h1>
+            Scan Report
+          </h1>
+
+          <p className="history-error">
+            {error}
+          </p>
+
+        </main>
+
+      </div>
+    );
+  }
+
+  if (!scan) {
+    return (
+      <div className="app-layout">
+
+        <Sidebar />
+
+        <main className="scan-result-page">
+
+          <h1>
+            No scan result found
+          </h1>
+
+        </main>
+
+      </div>
+    );
+  }
+
+  return (
+    <div className="app-layout">
+
+      <Sidebar />
+
+      <main className="scan-result-page">
+
+        <div className="scan-result-header">
+
+          <h1>
+            Security Scan Report
+          </h1>
+
+          <p>
+            Detailed analysis of the scanned file
+          </p>
+
+        </div>
+
+        <div className="scan-overview">
+
+          <div className="result-card">
+
+            <h3>
+              Risk Score
+            </h3>
+
+            <div className="risk-score-large">
+
+              {scan.risk_score}%
+
+            </div>
+
+          </div>
+
+          <div className="result-card">
+
+            <h3>
+              Verdict
+            </h3>
+
+            <div className="verdict-large">
+
+              {scan.verdict}
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div className="result-section">
+
+          <h2>
+            AI Threat Summary
+          </h2>
+
+          <p>
+
+            {scan.ai_summary ||
+              "No AI summary available."}
+
+          </p>
+
+        </div>
+
+        <div className="result-section">
+
+          <h2>
+            Detection Analysis
+          </h2>
+
+          <div className="detection-grid">
+
+            <div>
+              <strong>
+                Emails
+              </strong>
+
+              <span>
+                {scan.detected_emails?.length || 0}
+              </span>
+            </div>
+
+            <div>
+              <strong>
+                URLs
+              </strong>
+
+              <span>
+                {scan.detected_urls?.length || 0}
+              </span>
+            </div>
+
+            <div>
+              <strong>
+                Secrets
+              </strong>
+
+              <span>
+                {scan.detected_secrets?.length || 0}
+              </span>
+            </div>
+
+            <div>
+              <strong>
+                Phones
+              </strong>
+
+              <span>
+                {scan.detected_phones?.length || 0}
+              </span>
+            </div>
+
+            <div>
+              <strong>
+                IP Addresses
+              </strong>
+
+              <span>
+                {scan.detected_ips?.length || 0}
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div className="result-section">
+
+          <h2>
+            Detected Keywords
+          </h2>
+
+          {scan.detected_keywords?.length > 0 ? (
+
+            <ul>
+
+              {scan.detected_keywords.map(
+                (keyword, index) => (
+
+                  <li key={index}>
+                    {keyword}
+                  </li>
+
+                )
+              )}
+
+            </ul>
+
+          ) : (
+
+            <p>
+              No suspicious keywords detected.
+            </p>
+
+          )}
+
+        </div>
+
+        <div className="result-section">
+
+          <h2>
+            Detected URLs
+          </h2>
+
+          {scan.detected_urls?.length > 0 ? (
+
+            <ul>
+
+              {scan.detected_urls.map(
+                (url, index) => (
+
+                  <li key={index}>
+                    {url}
+                  </li>
+
+                )
+              )}
+
+            </ul>
+
+          ) : (
+
+            <p>
+              No URLs detected.
+            </p>
+
+          )}
+
+        </div>
+
+      </main>
 
     </div>
-
   );
 }

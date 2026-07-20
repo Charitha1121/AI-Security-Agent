@@ -1,9 +1,3 @@
-"""FastAPI application entry point for the AI Security Agent backend.
-
-This module initializes the FastAPI application, configures middleware,
-and registers API routers.
-"""
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -29,7 +23,6 @@ app = FastAPI(
 @app.on_event("startup")
 async def startup_event():
     """Initialize the database."""
-
     init_db()
 
 
@@ -43,14 +36,16 @@ app.include_router(
 # Scan APIs
 app.include_router(
     scan_router,
-    prefix=settings.API_V1_PREFIX,
+    prefix=f"{settings.API_V1_PREFIX}/scan",
+    tags=["Scan"],
 )
 
 
 # File management APIs
 app.include_router(
     files_router,
-    prefix=settings.API_V1_PREFIX,
+    prefix=f"{settings.API_V1_PREFIX}/files",
+    tags=["Files"],
 )
 
 
@@ -66,10 +61,6 @@ app.add_middleware(
 
 @app.get("/", tags=["root"])
 async def read_root() -> dict[str, str]:
-    """Return a basic descriptor for the API root endpoint."""
-
-    logger.info("Root endpoint requested")
-
     return {
         "message": f"{settings.APP_NAME} backend is running."
     }
@@ -77,10 +68,6 @@ async def read_root() -> dict[str, str]:
 
 @app.get("/health", tags=["health"])
 async def health_check() -> dict[str, str]:
-    """Provide service health status."""
-
-    logger.info("Health check requested")
-
     return {
         "status": "ok"
     }

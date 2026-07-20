@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import "../styles/scan-history.css";
 
 const API_URL = "http://127.0.0.1:8000";
 
 export default function ScanHistory() {
+  const navigate = useNavigate();
+
   const [scans, setScans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -18,7 +21,6 @@ export default function ScanHistory() {
       setLoading(true);
       setError("");
 
-      // Use the same key used during login
       const token = localStorage.getItem("token");
 
       if (!token) {
@@ -26,7 +28,7 @@ export default function ScanHistory() {
       }
 
       const response = await fetch(
-        `${API_URL}/api/v1/history`,
+        `${API_URL}/api/v1/scan/history`,
         {
           method: "GET",
           headers: {
@@ -37,7 +39,8 @@ export default function ScanHistory() {
       );
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
+        const errorData =
+          await response.json().catch(() => null);
 
         console.error(
           "Scan history API error:",
@@ -47,7 +50,7 @@ export default function ScanHistory() {
 
         throw new Error(
           errorData?.detail ||
-          "Failed to load scan history"
+            "Failed to load scan history"
         );
       }
 
@@ -58,11 +61,14 @@ export default function ScanHistory() {
       setScans(data);
 
     } catch (error) {
-      console.error("Scan History Error:", error);
+      console.error(
+        "Scan History Error:",
+        error
+      );
 
       setError(
         error.message ||
-        "Unable to load scan history"
+          "Unable to load scan history"
       );
 
     } finally {
@@ -84,10 +90,13 @@ export default function ScanHistory() {
       <main className="history-page">
 
         <div className="history-header">
+
           <h1>Scan History</h1>
+
           <p>
             View all your previous security scans
           </p>
+
         </div>
 
         {loading && (
@@ -105,94 +114,149 @@ export default function ScanHistory() {
         {!loading &&
           !error &&
           scans.length === 0 && (
+
             <div className="history-message">
               No scan history found.
             </div>
+
           )}
 
         {!loading &&
           !error &&
           scans.length > 0 && (
 
-          <div className="history-table-container">
+            <div className="history-table-container">
 
-            <table className="history-table">
+              <table className="history-table">
 
-              <thead>
-                <tr>
-                  <th>File ID</th>
-                  <th>Risk Score</th>
-                  <th>Verdict</th>
-                  <th>Emails</th>
-                  <th>URLs</th>
-                  <th>Secrets</th>
-                  <th>Scanned On</th>
-                </tr>
-              </thead>
+                <thead>
 
-              <tbody>
+                  <tr>
 
-                {scans.map((scan) => (
+                    <th>File ID</th>
 
-                  <tr key={scan.id}>
+                    <th>Risk Score</th>
 
-                    <td>
-                      {scan.file_id
-                        ? `${scan.file_id.slice(0, 8)}...`
-                        : "N/A"}
-                    </td>
+                    <th>Verdict</th>
 
-                    <td>
-                      <span
-                        className={`risk-score ${getRiskClass(
-                          scan.risk_score
-                        )}`}
-                      >
-                        {scan.risk_score}%
-                      </span>
-                    </td>
+                    <th>Emails</th>
 
-                    <td>
-                      <span
-                        className={`verdict ${getRiskClass(
-                          scan.risk_score
-                        )}`}
-                      >
-                        {scan.verdict}
-                      </span>
-                    </td>
+                    <th>URLs</th>
 
-                    <td>
-                      {scan.detected_emails?.length || 0}
-                    </td>
+                    <th>Secrets</th>
 
-                    <td>
-                      {scan.detected_urls?.length || 0}
-                    </td>
+                    <th>Scanned On</th>
 
-                    <td>
-                      {scan.detected_secrets?.length || 0}
-                    </td>
-
-                    <td>
-                      {scan.created_at
-                        ? new Date(
-                            scan.created_at
-                          ).toLocaleDateString()
-                        : "N/A"}
-                    </td>
+                    <th>Action</th>
 
                   </tr>
 
-                ))}
+                </thead>
 
-              </tbody>
+                <tbody>
 
-            </table>
+                  {scans.map((scan) => (
 
-          </div>
+                    <tr key={scan.id}>
 
-        )}
+                      <td>
+
+                        {scan.file_id
+                          ? `${scan.file_id.slice(
+                              0,
+                              8
+                            )}...`
+                          : "N/A"}
+
+                      </td>
+
+                      <td>
+
+                        <span
+                          className={`risk-score ${getRiskClass(
+                            scan.risk_score
+                          )}`}
+                        >
+
+                          {scan.risk_score}%
+
+                        </span>
+
+                      </td>
+
+                      <td>
+
+                        <span
+                          className={`verdict ${getRiskClass(
+                            scan.risk_score
+                          )}`}
+                        >
+
+                          {scan.verdict}
+
+                        </span>
+
+                      </td>
+
+                      <td>
+
+                        {scan.detected_emails
+                          ?.length || 0}
+
+                      </td>
+
+                      <td>
+
+                        {scan.detected_urls
+                          ?.length || 0}
+
+                      </td>
+
+                      <td>
+
+                        {scan.detected_secrets
+                          ?.length || 0}
+
+                      </td>
+
+                      <td>
+
+                        {scan.created_at
+                          ? new Date(
+                              scan.created_at
+                            ).toLocaleDateString()
+                          : "N/A"}
+
+                      </td>
+
+                      <td>
+
+                        <button
+                          className="view-scan-button"
+                          onClick={() =>
+                            navigate(
+                              `/scan/${scan.file_id}`
+                            )
+                          }
+                        >
+
+                          View Report
+
+                        </button>
+
+                      </td>
+
+                    </tr>
+
+                  ))}
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          )}
 
       </main>
 
